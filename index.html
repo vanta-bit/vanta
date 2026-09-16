@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VANTA | Fashion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <nav>
+    <a href="#home" class="logo">
+        <img src="./vanta-logo-transparent.png" alt="VANTA Logo">
+    </a>
+
+    <div>
+    <a href="#home">Home</a>
+    <a href="#collections">Shop</a>
+    <a href="#collections">Collections</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#cart">🛒 Cart (<span id="cart-count">0</span>)</a>
+</div>
+</nav>
+
+    <section class="hero" id="home">
+
+    <h2>WEAR YOUR IDENTITY.</h2>
+
+    <p>Discover the latest VANTA collection.</p>
+
+    <a href="#collections" class="shop-button">SHOP NOW</a>
+
+</section>
+<section class="collection" id="collections">
+
+    <h2>NEW COLLECTION</h2>
+
+    <p>Explore the latest pieces from VANTA.</p>
+
+    <div class="products">
+
+    <div class="product-card">
+    <div class="product-image">
+        <img src="vanta-tee.png" alt="VANTA Tee">
+    </div>
+
+    <h3>VANTA TEE</h3>
+    <p>GHS100</p>
+
+    <label for="tee-size">SIZE</label>
+
+    <select id="tee-size" class="size-select">
+        <option value="">Select Size</option>
+        <option value="S">Small (S)</option>
+        <option value="M">Medium (M)</option>
+        <option value="L">Large (L)</option>
+        <option value="XL">Extra Large (XL)</option>
+        <option value="2XL">Extra extra Large (XXL)</option>
+    </select>
+
+    <button class="add-cart">ADD TO CART</button>
+</div>
+
+    <div class="product-card">
+    <div class="product-image">
+        <img src="vanta-hoodie.png" alt="VANTA Hoodie">
+    </div>
+
+    <h3>VANTA HOODIE</h3>
+<p>GHS200</p>
+
+<label for="hoodie-size">SIZE</label>
+
+<select id="hoodie-size" class="size-select">
+    <option value="">Select Size</option>
+    <option value="S">Small (S)</option>
+    <option value="M">Medium (M)</option>
+    <option value="L">Large (L)</option>
+    <option value="XL">Extra Large (XL)</option>
+    <option value="2XL">Extra extra Large (XXL)</option>
+</select>
+
+<button class="add-cart">ADD TO CART</button>
+</div>
+
+    <div class="product-card">
+    <div class="product-image">
+        <img src="vanta-jacket.png" alt="VANTA Jacket">
+    </div>
+
+    <h3>VANTA JACKET</h3>
+
+<p>GHS250</p>
+
+<select class="size-select">
+    <option value="">SELECT SIZE</option>
+    <option value="S">S</option>
+    <option value="M">M</option>
+    <option value="L">L</option>
+    <option value="XL">XL</option>
+    <option value="2XL">XXL</option>
+</select>
+
+<button class="add-cart">ADD TO CART</button>
+</div>
+
+</div>
+
+</section>
+<section id="cart" class="cart-section">
+    <h2>YOUR CART</h2>
+
+    <div id="cart-items">
+        <p>Your cart is empty.</p>
+    </div>
+
+    <h3>Total: GHS<span id="cart-total">0</span></h3>
+    <button id="checkout-btn">CHECKOUT</button>
+    <div id="checkout-form" style="display: none;">
+    <h2>CHECKOUT</h2>
+
+    <input type="text" id="customer-name" placeholder="Full Name">
+
+    <input type="email" id="customer-email" placeholder="Email Address">
+
+    <input type="text" id="customer-phone" placeholder="Phone Number">
+
+    <textarea id="customer-address" placeholder="Delivery Address"></textarea>
+    <div id="order-summary">
+    <h3>ORDER SUMMARY</h3>
+    <div id="checkout-items"></div>
+    <p><strong>Total: GHS<span id="checkout-total">0</span></strong></p>
+</div>
+<div id="payment-section">
+    <h3>PAYMENT METHOD</h3>
+
+    <select id="payment-method">
+        <option value="">SELECT PAYMENT METHOD</option>
+        <option value="mobile-money">Mobile Money</option>
+        <option value="card">Card</option>
+    </select>
+</div>
+
+    <button id="place-order-btn">PLACE ORDER</button>
+</div>
+
+<div id="order-confirmation" style="display: none;">
+    <h2>ORDER CONFIRMED ✓</h2>
+
+    <p>Thank you for your order, <span id="confirmation-name"></span>.</p>
+
+    <div class="confirmation-details">
+        <p>
+            <strong>Order Number:</strong>
+            #<span id="confirmation-order-id"></span>
+        </p>
+
+        <p>
+            <strong>Payment:</strong>
+            <span class="paid-badge">PAID</span>
+        </p>
+
+        <p>
+            <strong>Total:</strong>
+            GHS<span id="confirmation-total"></span>
+        </p>
+    </div>
+
+    <button id="continue-shopping-btn">
+        CONTINUE SHOPPING
+    </button>
+</div>
+</section>
+<script>
+let cart = [];
+let total = 0;
+
+const buttons = document.querySelectorAll(".add-cart");
+
+buttons.forEach(button => {
+    button.addEventListener("click", function() {
+
+        const productCard = button.closest(".product-card");
+
+        const name = productCard.querySelector("h3").textContent;
+const priceText = productCard.querySelector("p").textContent;
+const price = parseInt(priceText.replace("GHS", ""));
+
+const sizeSelect = productCard.querySelector(".size-select");
+
+if (sizeSelect && !sizeSelect.value) {
+    alert("Please select a size.");
+    return;
+}
+
+const size = sizeSelect ? sizeSelect.value : "N/A";
+
+        cart.push({
+    name: name,
+    price: price,
+    size: size,
+    quantity: 1
+});
+
+        total += price;
+
+        document.getElementById("cart-count").textContent = cart.length;
+        document.getElementById("cart-total").textContent = total;
+
+        displayCart();
+    });
+});
+
+function displayCart() {
+    const cartItems = document.getElementById("cart-items");
+
+    cartItems.innerHTML = "";
+
+    cart.forEach((item, index) => {
+        const itemElement = document.createElement("div");
+
+        itemElement.className = "cart-item";
+
+        itemElement.innerHTML = `
+            <div class="cart-item-info">
+
+                <p>
+                    ${item.name} - Size ${item.size} - GHS${item.price}
+                </p>
+
+                <div class="quantity-controls">
+
+                    <button onclick="decreaseQuantity(${index})">−</button>
+
+                    <span class="quantity-number">
+                        ${item.quantity}
+                    </span>
+
+                    <button onclick="increaseQuantity(${index})">+</button>
+
+                    <button
+                        class="remove-button"
+                        onclick="removeItem(${index})">
+                        Remove
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        cartItems.appendChild(itemElement);
+    });
+}
+function increaseQuantity(index) {
+    cart[index].quantity++;
+
+    total += cart[index].price;
+
+    document.getElementById("cart-count").textContent =
+        cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    document.getElementById("cart-total").textContent = total;
+
+    displayCart();
+}
+
+function decreaseQuantity(index) {
+    if (cart[index].quantity > 1) {
+        cart[index].quantity--;
+
+        total -= cart[index].price;
+
+        document.getElementById("cart-count").textContent =
+            cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        document.getElementById("cart-total").textContent = total;
+
+        displayCart();
+    }
+}
+
+function removeItem(index) {
+    total -= cart[index].price * cart[index].quantity;
+
+    cart.splice(index, 1);
+
+    document.getElementById("cart-count").textContent =
+        cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    document.getElementById("cart-total").textContent = total;
+
+    if (cart.length === 0) {
+        document.getElementById("cart-items").innerHTML =
+            "<p>Your cart is empty.</p>";
+    } else {
+        displayCart();
+    }
+}
+document.getElementById("checkout-btn").addEventListener("click", function() {
+    if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+    }
+
+    const checkoutItems = document.getElementById("checkout-items");
+
+    checkoutItems.innerHTML = "";
+
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+
+        checkoutItems.innerHTML += `
+            <p>
+                ${item.name} — Size ${item.size} —
+                ${item.quantity} × GHS${item.price}
+                = GHS${itemTotal}
+            </p>
+        `;
+    });
+
+    document.getElementById("checkout-total").textContent = total;
+
+    document.getElementById("checkout-form").style.display = "block";
+});
+document.getElementById("place-order-btn").addEventListener("click",async function() {
+    const name = document.getElementById("customer-name").value.trim();
+    const email = document.getElementById("customer-email").value.trim();
+    const phone = document.getElementById("customer-phone").value.trim();
+    const address = document.getElementById("customer-address").value.trim();
+
+    const paymentMethod = document.getElementById("payment-method").value;
+
+if (!name || !email || !phone || !address) {
+    alert("Please fill in all your details.");
+    return;
+}
+
+if (!paymentMethod) {
+    alert("Please select a payment method.");
+    return;
+}
+
+const orderItems = JSON.parse(JSON.stringify(cart));
+const orderTotal = total;
+
+   try {
+    const response = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            amount: total * 100,
+            firstName: name,
+            phone: phone,
+            metadata: {
+                customer_name: name,
+                customer_phone: phone,
+                customer_address: address,
+                payment_method: paymentMethod,
+                cart: cart
+            }
+        })
+    });
+
+   const data = await response.json();
+
+if (!response.ok || !data.status) {
+    alert("Could not initialize payment: " + data.message);
+    return;
+}
+
+// Start Paystack payment
+const paystack = new PaystackPop();
+
+paystack.resumeTransaction(data.data.access_code);
+
+const reference = data.data.reference;
+const orderTotal = Number(total);
+const expectedAmount = Math.round(orderTotal * 100);
+
+// Check payment status
+const checkPayment = async () => {
+    try {
+        const verifyResponse = await fetch("/api/paystack/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                reference: reference,
+                expectedAmount: expectedAmount
+            })
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (
+            verifyResponse.ok &&
+            verifyData.status &&
+            verifyData.data.status === "success"
+        ) {
+            // Payment successful
+            alert(
+                "Payment successful! Thank you, " +
+                name +
+                ". Your payment has been verified."
+            );
+
+            // Save the order
+            const orderResponse = await fetch("/api/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    customer: {
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        address: address
+                    },
+                    items: cart,
+                    total: orderTotal,
+                    paymentReference: reference || data.data.reference
+                })
+            });
+
+            const orderData = await orderResponse.json();
+
+            if (!orderResponse.ok || !orderData.status) {
+    console.error("ORDER SAVE ERROR:", orderData);
+
+    alert(
+        "Order could not be saved: " +
+        (orderData.message || "Unknown error")
+    );
+
+    return;
+}
+
+            // Show confirmation
+            document.getElementById("confirmation-name").textContent = name;
+            document.getElementById("confirmation-order-id").textContent =
+                orderData.orderId;
+           document.getElementById("confirmation-total").textContent = orderTotal;
+
+            document.getElementById("checkout-form").style.display = "none";
+            document.getElementById("order-confirmation").style.display = "block";
+
+          
+
+            return;
+        }
+
+        // Payment not completed yet — check again
+        setTimeout(checkPayment, 3000);
+
+    } catch (error) {
+        console.error("Verification error:", error);
+
+        // Try again
+        setTimeout(checkPayment, 3000);
+    }
+};
+
+// Start checking payment
+setTimeout(checkPayment, 3000);
+
+} catch (error) {
+    console.error(error);
+    alert("Something went wrong while starting payment.");
+}
+
+    document.getElementById("cart-count").textContent = "0";
+    document.getElementById("cart-total").textContent = "0";
+
+    document.getElementById("cart-items").innerHTML =
+        "<p>Your cart is empty.</p>";
+
+    document.getElementById("checkout-form").style.display = "none";
+
+    document.getElementById("customer-name").value = "";
+    document.getElementById("customer-email").value = "";
+    document.getElementById("customer-phone").value = "";
+    document.getElementById("customer-address").value = "";
+});
+document.getElementById("continue-shopping-btn").addEventListener("click", function() {
+    document.getElementById("order-confirmation").style.display = "none";
+    cart = [];
+    total = 0;
+
+    document.getElementById("collections").scrollIntoView({
+        behavior: "smooth"
+    });
+});
+</script>
+
+
+<script src="https://js.paystack.co/v2/inline.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VANTA Admin Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <section class="admin-login">
+
+        <h1>VANTA</h1>
+        <h2>ADMIN LOGIN</h2>
+
+        <input
+            type="text"
+            id="admin-username"
+            placeholder="Username"
+        >
+
+        <input
+            type="password"
+            id="admin-password"
+            placeholder="Password"
+        >
+
+        <button id="login-btn">LOGIN</button>
+
+        <p id="login-message"></p>
+
+    </section>
+
+<script>
+    document.getElementById("login-btn").addEventListener("click", async function() {
+
+        console.log("LOGIN BUTTON CLICKED");
+        
+        const usernameElement = document.getElementById("admin-username");
+const passwordElement = document.getElementById("admin-password");
+
+console.log("USERNAME ELEMENT:", usernameElement);
+console.log("PASSWORD ELEMENT:", passwordElement);
+
+const username = usernameElement.value.trim();
+const password = passwordElement.value;
+
+console.log("ABOUT TO SEND LOGIN REQUEST");
+
+        
+
+        const message = document.getElementById("login-message");
+
+        if (!username || !password) {
+            message.textContent = "Please enter your username and password.";
+            return;
+        }
+
+        try {
+    console.log("STARTING FETCH");
+
+    const response = await fetch("http://localhost:3000/api/admin/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    });
+
+    console.log("FETCH COMPLETED");
+    console.log("STATUS:", response.status);
+
+    const data = await response.json();
+
+    console.log("SERVER RESPONSE:", data);
+
+    if (response.ok && data.status) {
+        sessionStorage.setItem("vantaAdmin", "true");
+        window.location.href = "/admin.html";
+    } else {
+        message.textContent = data.message;
+    }
+
+} catch (error) {
+    console.error("FETCH ERROR:", error);
+    message.textContent = "Something went wrong. Please try again.";
+}
+
+});
+
+            
+</script>
+
+</body>
+</html>

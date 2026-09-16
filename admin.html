@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VANTA Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<section class="admin-section">
+
+    <div class="admin-header">
+        <div>
+            <h1>VANTA ADMIN</h1>
+            <p>Store Management Dashboard</p>
+        </div>
+    </div>
+
+    <h2>ORDERS</h2>
+
+    <button id="refresh-orders">REFRESH ORDERS</button>
+    <button id="logout-btn">LOGOUT</button>
+
+    <!-- SEARCH + FILTER -->
+    <div class="order-tools">
+
+        <input
+            type="text"
+            id="order-search"
+            placeholder="Search by name, email, phone or order ID..."
+        >
+
+        <select id="status-filter">
+            <option value="All">ALL ORDERS</option>
+            <option value="Pending">PENDING</option>
+            <option value="Processing">PROCESSING</option>
+            <option value="Shipped">SHIPPED</option>
+            <option value="Delivered">DELIVERED</option>
+            <option value="Cancelled">CANCELLED</option>
+        </select>
+
+    </div>
+
+    <div class="admin-stats">
+
+    <div class="stat-card">
+        <h3>TOTAL ORDERS</h3>
+        <p id="total-orders">0</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>TOTAL REVENUE</h3>
+        <p>GHS<span id="total-revenue">0</span></p>
+    </div>
+
+    <div class="stat-card">
+        <h3>PENDING</h3>
+        <p id="pending-orders">0</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>DELIVERED</h3>
+        <p id="delivered-orders">0</p>
+    </div>
+
+</div>
+
+    <div id="orders-container">
+        <p>Loading orders...</p>
+    </div>
+
+<script>
+
+if (sessionStorage.getItem("vantaAdmin") !== "true") {
+    window.location.href = "/login.html";
+}
+
+let allOrders = [];
+
+
+/* LOAD ORDERS */
+
+async function loadOrders() {
+
+    try {
+
+        const response = await fetch("/api/orders");
+
+        if (response.status === 401) {
+            sessionStorage.removeItem("vantaAdmin");
+            window.location.href = "/login.html";
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!data.status) {
+            document.getElementById("orders-container").innerHTML =
+                "<p>Could not load orders.</p>";
+            return;
+        }
+
+        allOrders = data.orders || [];
+
+        updateStats();
+        displayOrders();
+
+    } catch (error) {
+
+        console.error("Order loading error:", error);
+
+        document.getElementById("orders-container").innerHTML =
+            "<p>Could not load orders.</p>";
+    }
+}
+
+
+/* UPDATE STATISTICS */
+
+function updateStats() {
+
+    document.getElementById("total-orders").textContent =
+        allOrders.length;
+
+    const revenue = allOrders.reduce(
+        (sum, order) => sum + Number(order.total || 0),
+        0
+    );
+
+    document.getElementById("total-revenue").textContent =
+        revenue.toFixed(2);
+
+    const pending = allOrders.filter(
+        order => order.orderStatus === "Pending"
+    ).length;
+
+    const delivered = allOrders.filter(
+        order => order.orderStatus === "Delivered"
+    ).length;
+
+    document.getElementById("pending-orders").textContent =
+        pending;
+
+    document.getElementById("delivered-orders").textContent =
+        delivered;
+}
+
+
+/* DISPLAY ORDERS */
+
+function displayOrders() {
+
+    const container =
+        document.getElementById("orders-container");
+
+    const search =
+        document.getElementById("order-search")
+            .value
+            .toLowerCase()
+            .trim();
+
+    const status =
+        document.getElementById("status-filter").value;
+
+
+    let filteredOrders = allOrders.filter(order => {
+
+        const customer = order.customer || {};
+
+        const matchesSearch =
+            String(order.id).toLowerCase().includes(search) ||
+            String(customer.name || "").toLowerCase().includes(search) ||
+            String(customer.email || "").toLowerCase().includes(search) ||
+            String(customer.phone || "").toLowerCase().includes(search);
+
+        const matchesStatus =
+            status === "All" ||
+            order.orderStatus === status;
+
+        return matchesSearch && matchesStatus;
+
+    });
+
+
+    if (filteredOrders.length === 0) {
+
+        container.innerHTML =
+            "<p>No matching orders found.</p>";
+
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    filteredOrders
+    .slice()
+    .reverse()
+    .forEach(order => {
+
+        const customer = order.customer || {};
+
+        const orderElement =
+            document.createElement("div");
+
+            orderElement.className =
+                "admin-order";
+
+
+            orderElement.innerHTML = `
+
+                <h3>Order #${order.id}</h3>
+
+                <p>
+                    <strong>Date:</strong>
+                    ${new Date(order.date).toLocaleString()}
+                </p>
+
+                <p>
+                    <strong>Payment:</strong>
+                    <span class="paid-badge">PAID</span>
+                </p>
+
+                <p>
+                    <strong>Order Status:</strong>
+
+                    <select
+                        class="order-status-select"
+                        onchange="updateOrderStatus(${order.id}, this.value)"
+                    >
+
+                        <option value="Pending"
+                            ${order.orderStatus === "Pending" ? "selected" : ""}>
+                            Pending
+                        </option>
+
+                        <option value="Processing"
+                            ${order.orderStatus === "Processing" ? "selected" : ""}>
+                            Processing
+                        </option>
+
+                        <option value="Shipped"
+                            ${order.orderStatus === "Shipped" ? "selected" : ""}>
+                            Shipped
+                        </option>
+
+                        <option value="Delivered"
+                            ${order.orderStatus === "Delivered" ? "selected" : ""}>
+                            Delivered
+                        </option>
+
+                        <option value="Cancelled"
+                            ${order.orderStatus === "Cancelled" ? "selected" : ""}>
+                            Cancelled
+                        </option>
+
+                    </select>
+                </p>
+
+                <p>
+                    <strong>Customer:</strong>
+                    ${customer.name || ""}
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    ${customer.email || ""}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    ${customer.phone || ""}
+                </p>
+
+                <p>
+                    <strong>Address:</strong>
+                    ${customer.address || ""}
+                </p>
+
+                <p>
+                    <strong>Total:</strong>
+                    GHS${Number(order.total || 0).toFixed(2)}
+                </p>
+
+                <p>
+                    <strong>Reference:</strong>
+                    ${order.paymentReference || ""}
+                </p>
+
+                <h4>Items</h4>
+
+                ${(order.items || []).map(item => `
+
+                    <p>
+                        ${item.name} —
+                        Size ${item.size} —
+                        Quantity: ${item.quantity} —
+                        GHS${item.price}
+                    </p>
+
+                `).join("")}
+
+                <hr>
+            `;
+
+
+            container.appendChild(orderElement);
+
+        });
+
+}
+
+
+/* SEARCH */
+
+document
+    .getElementById("order-search")
+    .addEventListener("input", displayOrders);
+
+
+/* FILTER */
+
+document
+    .getElementById("status-filter")
+    .addEventListener("change", displayOrders);
+
+
+/* REFRESH */
+
+document
+    .getElementById("refresh-orders")
+    .addEventListener("click", loadOrders);
+
+
+/* LOGOUT */
+
+document
+    .getElementById("logout-btn")
+    .addEventListener("click", async function() {
+
+        await fetch("/api/admin/logout", {
+            method: "POST"
+        });
+
+        sessionStorage.removeItem("vantaAdmin");
+
+        window.location.href = "/login.html";
+
+    });
+
+
+/* UPDATE ORDER STATUS */
+
+async function updateOrderStatus(orderId, newStatus) {
+
+    try {
+
+        const response = await fetch(
+            `/api/orders/${orderId}/status`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    status: newStatus
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.status) {
+
+            alert("Could not update order status.");
+
+            return;
+        }
+
+
+        const order =
+            allOrders.find(
+                order => order.id === orderId
+            );
+
+
+        if (order) {
+            order.orderStatus = newStatus;
+        }
+
+
+        displayOrders();
+
+
+    } catch (error) {
+
+        console.error(
+            "Status update error:",
+            error
+        );
+
+        alert(
+            "Something went wrong while updating the order."
+        );
+
+    }
+
+}
+
+
+loadOrders();
+
+</script>
+
+</section>
+
+</body>
+</html>
