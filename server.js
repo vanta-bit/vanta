@@ -24,6 +24,10 @@ app.use(session({
 }));
 
 app.use(express.static("."));
+app.get("/sitemap.xml", (req, res) => {
+    res.type("application/xml");
+    res.sendFile(__dirname + "/sitemap.xml");
+});
 
 
 // ===============================
